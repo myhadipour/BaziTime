@@ -1,3 +1,4 @@
+
 name: Build BaziTime APK
 
 on:
@@ -23,6 +24,18 @@ jobs:
 
       - uses: android-actions/setup-android@v4
 
+      - name: Inspect Android Launcher Icons
+        run: |
+          echo "===== Adaptive Icon XML ====="
+          find app/src/main/res/mipmap-anydpi-v26 \
+            -maxdepth 1 -type f -name '*.xml' \
+            -print -exec cat {} \;
+
+          echo "===== Available Launcher Icons ====="
+          find app/src/main/res \
+            -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_round*' \) \
+            -print
+
       - name: Build APK
         run: gradle assembleDebug
 
@@ -31,3 +44,4 @@ jobs:
         with:
           name: BaziTime-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
