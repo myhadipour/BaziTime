@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بازی تایم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f4f8;--card:#fff;--card-alt:#dce4f3;--text:#1d1d1f;--muted:#777984;--line:#e1e3e9;--blue:#0a84ff;--green:#22b653;--red:#e5484d;--orange:#d88916;--soft:#f5f6f8;--shadow:0 2px 12px #00000009;--nav:68px}
+html[data-theme=dark]{--bg:#101319;--card:#1b2029;--card-alt:#2a3344;--text:#f3f4f7;--muted:#a2a7b2;--line:#303642;--soft:#232a35;--shadow:0 2px 14px #0005;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:Vazirmatn,Tahoma,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.top{height:56px;flex:none;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.brand .shop-name{font-size:12px;font-weight:500;color:var(--muted);border-right:1px solid var(--line);padding-right:8px;margin-right:2px}
+.top-actions{display:flex;gap:8px}
+.svg-icon{display:block;flex:none;width:1.25em;height:1.25em;overflow:visible}.nav .svg-icon{width:21px;height:21px}.icon-btn .svg-icon{width:19px;height:19px}.brand .svg-icon{display:inline-block;vertical-align:middle;margin-left:2px}.icon-btn{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:var(--soft);color:var(--muted);flex:none}
+.main{flex:1;overflow:auto;padding:16px 16px calc(var(--nav) + 24px);overscroll-behavior:contain}
+.page-title{margin:0 0 5px;font-size:20px;font-weight:800;display:block;line-height:1.5}.page-sub{margin:0 0 18px;font-size:12px;color:var(--muted);line-height:1.9}.page-head{display:block;margin-bottom:4px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.stat,.panel,.device,.row-card{background:var(--card);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.devices>.device:nth-child(even){background:var(--card-alt)}
+#deviceRows>.device-row:nth-child(even),#menuRows>.menu-row:nth-child(even){background:var(--card-alt)}
+.list>.list-item:nth-child(even){background:var(--card-alt)}
+.stat{text-align:center;padding:12px 6px;min-width:0}.stat small{display:block;color:var(--muted);font-size:10px}.stat b{display:block;font-size:15px;margin-top:3px;overflow:hidden;text-overflow:ellipsis}
+.panel{padding:16px;margin-bottom:14px;min-width:0}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.panel-title{font-size:14px;font-weight:800;margin:0;display:flex;align-items:center;gap:7px;line-height:1.7}
+.btn{min-height:38px;padding:8px 14px;border-radius:999px;background:var(--soft);color:var(--text);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.primary{background:var(--blue);color:white}.success{background:var(--green);color:white}.danger{background:var(--red);color:white}.warn{background:#fff1dc;color:#a65d00}
+html[data-theme=dark] .warn{background:#392a17;color:#ffc16c}
+.full{width:100%}.muted{color:var(--muted)}
+/* === چیدمان جدید فیلترها و دکمه بوفه در داشبورد === */
+.dash-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:0}
+.chip{padding:7px 12px;border-radius:99px;background:var(--soft);color:var(--muted);font-size:11px;font-weight:700}
+.chip.active{background:var(--blue);color:#fff}
+.sale-btn-dash{padding:7px 14px;border-radius:99px;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.devices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.device{padding:14px;min-width:0;overflow:hidden}.device.off{opacity:.72}.device-top{display:flex;align-items:center;gap:9px;min-width:0}
+.device-status-wrap{display:flex;flex-direction:row;align-items:center;gap:6px;flex:none}
+.device-num-badge{background:var(--blue);color:#fff;font-size:10px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 6px #0a84ff33}
+.device-status-badge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.device-status-badge.is-free{background:#e8f6ed;color:#159447;border-color:#c7ebd3}
+.device-status-badge.is-busy{background:#e6f2ff;color:#0a66cc;border-color:#cfe4ff}
+.device-status-badge.is-paused{background:#fff1dc;color:#a65d00;border-color:#ffe0ad}
+.device-status-badge.is-off{background:#fdeaea;color:#c0272d;border-color:#f8cfcf}
+html[data-theme=dark] .device-status-badge.is-free{background:#163524;color:#4fd484;border-color:#1f4a33}
+html[data-theme=dark] .device-status-badge.is-busy{background:#122a42;color:#6cb2ff;border-color:#1b3c5c}
+html[data-theme=dark] .device-status-badge.is-paused{background:#392a17;color:#ffc16c;border-color:#4a3620}
+html[data-theme=dark] .device-status-badge.is-off{background:#3a1c1e;color:#ff8f93;border-color:#512528}
+.device-icon{width:38px;height:38px;border-radius:12px;background:#e9f2ff;color:var(--blue);display:grid;place-items:center;flex:none;font-size:17px}
+.device-name{font-size:13px;font-weight:800;min-width:0;overflow-wrap:anywhere}.device-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.timer{font-size:27px;font-weight:400;text-align:center;direction:ltr;font-variant-numeric:tabular-nums;margin:12px 0 0}
+.cost{text-align:center;color:var(--blue);font-weight:800;font-size:13px;min-height:20px}.device-billing{display:grid;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:9px}.billing-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;line-height:1.7}.billing-line span{color:var(--muted)}.billing-line b{white-space:nowrap;font-variant-numeric:tabular-nums}.billing-line.total{border-top:1px solid var(--line);padding-top:6px;margin-top:2px;font-weight:800}.billing-line.total b{color:var(--blue)}
+.status{text-align:center;color:var(--muted);font-size:10px;min-height:18px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.actions .btn{flex:1;min-width:0;padding:7px 9px}
+.form-stack{display:flex;flex-direction:column;gap:10px}
+.device-row{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.row-heading{font-size:12px;font-weight:800;color:var(--muted)}
+.row-tools{display:flex;align-items:center;gap:8px;flex:none}
+.switch{position:relative;width:42px;height:24px;display:inline-block;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;z-index:2;cursor:pointer;width:100%;height:100%;margin:0}
+.switch i{position:absolute;inset:0;border-radius:30px;background:#c6cad2;transition:.2s}
+.switch i:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:.2s}
+.switch input:checked+i{background:var(--green)}.switch input:checked+i:after{transform:translateX(18px)}
+.remove{width:34px;height:34px;border-radius:10px;background:#ffeded;color:var(--red);display:grid;place-items:center;flex:none}
+html[data-theme=dark] .remove{background:#3a2328}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;font-weight:700;color:var(--muted)}
+.input{width:100%;min-width:0;height:40px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card);color:var(--text);outline:none;font-size:13px}
+.input:focus{border-color:var(--blue)}
+/* === چیدمان 3 ستونه دستگاه‌ها === */
+.device-fields{display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:8px;align-items:end}
+@media(max-width:520px){.device-fields{grid-template-columns:2fr 1fr;}.device-fields .field.price-field{grid-column:span 2;}}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.menu-row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(78px,.85fr) minmax(55px,.6fr) 34px;gap:8px;align-items:center;background:var(--soft);border:1px solid var(--line);padding:10px;border-radius:13px;min-width:0}
+.menu-row .input{height:38px;font-size:12px;padding:7px;min-width:0}
+.menu-row .remove{width:34px;height:34px}
+.list{display:flex;flex-direction:column;gap:8px}.list-item{padding:12px;border-radius:12px;background:var(--soft);border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+.bottom{height:calc(var(--nav) + env(safe-area-inset-bottom));padding:5px 6px env(safe-area-inset-bottom);position:fixed;bottom:0;left:0;right:0;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;z-index:10}
+.nav{flex:1;min-width:0;background:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:10px}.nav span:first-child{height:22px;display:grid;place-items:center}.nav.active{color:var(--blue);font-weight:800}
+.overlay{position:fixed;inset:0;background:#0006;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.modal{background:var(--card);border-radius:22px 22px 16px 16px;width:100%;max-width:520px;max-height:90dvh;overflow:auto;padding:20px;box-shadow:0 20px 70px #0004}
+.modal:has(>.alarm-modal){background:transparent;border:0;box-shadow:none;padding:0;border-radius:0;overflow:visible}
+.modal h3{font-size:16px;margin:0 0 12px}.modal p{font-size:12px;line-height:1.9;color:var(--muted)}
+.modal-actions{display:flex;gap:8px;margin-top:16px}.modal-actions>*{flex:1}
+.about-head{text-align:center;padding:8px 0 4px}.about-mark{width:48px;height:48px;border-radius:15px;background:#e8f2ff;color:var(--blue);display:grid;place-items:center;margin:0 auto 8px;font-size:24px}
+.about-desc{margin:8px 0 14px!important}
+.service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.service{display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:var(--soft);border:1px solid var(--line);min-width:0}
+.service-ic{width:30px;height:30px;border-radius:9px;background:#e8f2ff;color:var(--blue);display:grid;place-items:center;flex:none}
+.service b{font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+.contact-line{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:12px;margin-top:12px}
+.toast{position:fixed;z-index:50;bottom:calc(var(--nav) + 18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:99px;font-size:12px;box-shadow:0 6px 20px #0003;max-width:90%;text-align:center}
+.alarm-box{background:#fff7ed;border:1px dashed #f5a623;border-radius:10px;padding:8px 10px;margin-top:8px;text-align:center;font-size:11px;font-weight:700;color:#a65d00;display:flex;align-items:center;justify-content:center;gap:6px}
+html[data-theme=dark] .alarm-box{background:#392a17;border-color:#8a5a1c;color:#ffc16c}
+.alarm-box .svg-icon{width:14px;height:14px}
+/* === استایل جدید مودال یادآوری === */
+.alarm-overlay{align-items:center!important;padding:18px!important;z-index:80}
+.alarm-modal{max-width:400px;text-align:center;border-radius:24px;border:1px solid var(--line);background:var(--card);padding:24px 20px;box-shadow:0 15px 50px #0003}
+.alarm-modal .alarm-symbol{width:64px;height:64px;border-radius:50%;background:#e8f6ed;color:#159447;display:grid;place-items:center;margin:0 auto 16px;box-shadow:0 4px 12px #15944720}
+.alarm-modal .alarm-symbol .svg-icon{width:32px;height:32px}
+.alarm-modal h2{font-size:18px;margin:0 0 10px;color:var(--text);font-weight:800}
+.alarm-modal p{font-size:13px;line-height:2;color:var(--text);margin:0 0 20px;background:var(--soft);padding:12px;border-radius:12px;border:1px solid var(--line)}
+.alarm-modal p .device-name{color:var(--blue);font-weight:800}
+.alarm-modal .alarm-note{font-size:11px;color:var(--muted);margin-top:-10px;margin-bottom:16px;display:block}
+.alarm-modal .modal-actions{display:flex;gap:8px}
+.alarm-modal .modal-actions .btn{flex:1;border-radius:12px;height:44px;font-size:13px}
+.empty{text-align:center;padding:25px;color:var(--muted);font-size:12px}
+/* === گزارش‌ها (نمودار و جدول) === */
+.week-chart{display:flex;justify-content:space-between;align-items:flex-end;height:120px;gap:6px;margin-top:10px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.chart-bar{width:100%;background:var(--blue);border-radius:6px 6px 0 0;transition:height .3s;min-height:2px;opacity:0.8}
+.chart-bar.today{opacity:1;background:var(--green)}
+.chart-label{font-size:9px;color:var(--muted);font-weight:700}
+.report-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+.report-table th,.report-table td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line)}
+.report-table th{color:var(--muted);font-weight:700;font-size:10px}
+.report-table td b{color:var(--text)}
+@media(max-width:650px){.devices{grid-template-columns:1fr}.main{padding:12px 12px calc(var(--nav) + 20px)}.panel{padding:14px}.menu-row{grid-template-columns:minmax(0,1.2fr) minmax(70px,.85fr) minmax(48px,.6fr) 30px;gap:5px}.menu-row .price-wrap,.menu-row .stock-wrap{min-width:0}.menu-row .remove{width:30px;height:34px}.row-head{align-items:center}.stats{gap:6px}.stat{padding:10px 4px}.stat b{font-size:13px}.brand .shop-name{font-size:10px;padding-right:5px;margin-right:0}}
+@media(max-width:360px){.two{gap:7px}.device-row{padding:10px}.service{padding:8px}.service b{font-size:10px}.address{align-items:flex-start}.address strong{font-size:10px}}
+/* استایل اختصاصی لیست فروش بوفه */
+.sale-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.sale-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:var(--soft);border:1px solid var(--line);border-radius:12px}
+.sale-info{min-width:0;display:flex;flex-direction:column;gap:2px}
+.sale-info b{font-size:13px}
+.sale-info small{font-size:10px;color:var(--muted)}
+.sale-controls{display:flex;align-items:center;gap:8px;flex:none}
+.sale-controls .btn{width:36px;height:36px;padding:0;border-radius:10px;font-size:20px;display:grid;place-items:center;font-weight:bold}
+.sale-controls b{min-width:28px;text-align:center;font-size:15px;font-variant-numeric:tabular-nums;font-weight:800}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand">
+    <svg class="svg-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9h12a4 4 0 0 1 3.8 5.2l-1 3.2a2 2 0 0 1-3.2 1l-2.3-1.8H8.7l-2.3 1.8a2 2 0 0 1-3.2-1l-1-3.2A4 4 0 0 1 6 9Z"/><path d="M7 12v4M5 14h4M16 13h.01M18 15h.01"/></svg>
+    <span>بازی تایم</span>
+    <span class="shop-name" id="headerShopName"></span>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="aboutTop" title="درباره"><svg class="svg-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></button>
+    <button class="icon-btn" id="themeTop" title="تغییر پوسته"><svg class="svg-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4m12.8-12.8 1.4-1.4"/></svg></button>
+  </div>
+</header>
+<main class="main" id="main"></main>
+<nav class="bottom">
+<button class="nav active" data-page="dashboard"><span><svg class="svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>داشبورد</button>
+<button class="nav" data-page="reports"><span><svg class="svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V5M4 19h17M8 15v-4M13 15V7M18 15V3"/></svg></span>گزارش‌ها</button>
+<button class="nav" data-page="debts"><span><svg class="svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2M6 6V4a1 1 0 0 1 1-1h11"/></svg></span>قرض‌ها</button>
+<button class="nav" data-page="store"><span><svg class="svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="M3 7v10l9 5 9-5V7M12 12v10"/></svg></span>دستگاه‌ها</button>
+<button class="nav" data-page="settings"><span><svg class="svg-icon" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>تنظیمات</button>
+</nav>
+</div>
+<div id="toastRoot"></div>
+<script>
+'use strict';
+const KEY='gamenet_data_v1';
+function svgIcon(name,size=18){
+ const paths={
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+ chart:'<path d="M4 19V5M4 19h17"/><path d="M8 15v-4M13 15V7M18 15V3"/>',
+ wallet:'<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 9h18M16 14h2M6 6V4a1 1 0 0 1 1-1h11"/>',
+ cube:'<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="M3 7v10l9 5 9-5V7M12 12v10"/>',
+ // === آیکون تنظیمات جدید و تمیز ===
+ settings:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+ gamepad:'<path d="M6 9h12a4 4 0 0 1 3.8 5.2l-1 3.2a2 2 0 0 1-3.2 1l-2.3-1.8H8.7l-2.3 1.8a2 2 0 0 1-3.2-1l-1-3.2A4 4 0 0 1 6 9Z"/><path d="M7 12v4M5 14h4M16 13h.01M18 15h.01"/>',
+ monitor:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+ xbox:'<circle cx="12" cy="12" r="9"/><path d="M6 6c4 1 8 5 12 12M18 6C14 7 10 11 6 18"/>',
+ billiard:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>',
+ foosball:'<path d="M4 6h16M4 18h16M8 6v12M16 6v12M12 6v12"/>',
+ dart:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+ pingpong:'<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6M8 8h4v4"/>',
+ coffee:'<path d="M4 8h13v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8Z"/><path d="M17 10h2a2 2 0 1 1 0 4h-2M7 3v2M11 3v2M15 3v2"/>',
+ basket:'<path d="m3 10 2 10h14l2-10H3Z"/><path d="m8 10 4-7 4 7M9 13v4M15 13v4"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+ moon:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"/>',
+ trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 10v6M14 10v6"/>',
+ wrench:'<path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4L14 12l-2-2 2.7-3.7Z"/>',
+ download:'<path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ minus:'<path d="M5 12h14"/>',
+ alarm:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M22 6l-3-3"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z"/>',
+ heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>',
+ github:'<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6.2-1.5 6.2-6.8A5.3 5.3 0 0 0 19.7 5a4.9 4.9 0 0 0-.1-3.6s-1.1-.3-3.6 1.3a12.3 12.3 0 0 0-6.4 0C7.1 1.1 6 1.4 6 1.4a4.9 4.9 0 0 0-.1 3.6A5.3 5.3 0 0 0 4.4 8.7c0 5.2 3.2 6.5 6.2 6.8a3.4 3.4 0 0 0-1 2.6V22"/>'
+ };
+ return `<svg class="svg-icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.gamepad}</svg>`;
+}
+// === انواع دستگاه‌ها ===
+const TYPES={
+ ps5:{name:'پلی استیشن ۵',short:'PS5',price:100000,icon:'gamepad'},
+ ps4:{name:'پلی استیشن ۴',short:'PS4',price:60000,icon:'gamepad'},
+ ps3:{name:'پلی استیشن ۳',short:'PS3',price:40000,icon:'gamepad'},
+ ps2:{name:'پلی استیشن ۲',short:'PS2',price:25000,icon:'gamepad'},
+ xbox:{name:'ایکس باکس',short:'Xbox',price:80000,icon:'xbox'},
+ pc:{name:'کامپیوتر (PC)',short:'PC',price:50000,icon:'monitor'},
+ billiard:{name:'بیلیارد',short:'Billiard',price:80000,icon:'billiard'},
+ foosball:{name:'فوتبال دستی',short:'Foosball',price:60000,icon:'foosball'},
+ dart:{name:'دارت',short:'Dart',price:40000,icon:'dart'},
+ pingpong:{name:'پینگ پنگ',short:'PingPong',price:50000,icon:'pingpong'},
+ other:{name:'سایر',short:'دستگاه',price:50000,icon:'gamepad'}
+};
+const defaults=()=>({devices:[{id:1,type:'ps5',num:1,slot:1,price:100000,name:'PS5 - 1'},{id:2,type:'ps4',num:2,slot:2,price:60000,name:'PS4 - 1'}],next_id:3,menu:[{id:901,name:'چای',price:10000,stock:50},{id:902,name:'نوشابه',price:20000,stock:50},{id:903,name:'آب معدنی',price:8000,stock:50}],running:{},history:[],debts:[],theme:'light',autoBackup:true,shop:''});
+function load(){try{let d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return defaults();let merged=Object.assign(defaults(),d);merged.devices=(merged.devices||[]).map(x=>({...x,name:(TYPES[x.type]||TYPES.other).name}));return merged}catch(e){return defaults()}}
+let DB=load(),page='dashboard',filter='all',selectedDebt=null,tickHandle;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));if(DB.autoBackup)localStorage.setItem(KEY+'_backup_'+today(),JSON.stringify(DB))}catch(e){toast('ذخیره اطلاعات انجام نشد. فضای مرورگر را بررسی کنید.','error')}}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function num(v){let s=String(v??'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,\s٬،]/g,'');return /^\d+$/.test(s)?Number(s):null}
+function money(v){return Math.round(Number(v)||0).toLocaleString('en-US')}
+function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function duration(s){s=Math.max(0,Math.floor(s));return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,'0')).join(':')}
+function elapsed(r){return Math.max(0,(r.paused_at||Date.now()/1000)-r.start-(r.paused_total||0))}
+function timerPrice(d,r){return Math.round(elapsed(r)/3600*d.price)}
+function priceOf(d,r){return timerPrice(d,r)+extras(r)}
+function extras(r){return Object.entries(r.items||{}).reduce((a,[id,q])=>a+((r.item_prices&&r.item_prices[id])??(DB.menu.find(m=>String(m.id)===id)?.price||0))*q,0)}
+function toast(t,type=''){let n=document.createElement('div');n.className='toast';n.style.background=type==='error'?'#d9363e':type==='success'?'#188b43':'#222';n.textContent=t;$('#toastRoot').append(n);setTimeout(()=>n.remove(),2600)}
+function theme(){document.documentElement.dataset.theme=DB.theme||'light';$('#themeTop').innerHTML=svgIcon(DB.theme==='dark'?'moon':'sun',19);updateHeaderShop()}
+function updateHeaderShop(){$('#headerShopName').textContent=DB.shop?DB.shop:'';document.title='بازی تایم'+(DB.shop?' | '+DB.shop:'')}
+function pageHead(t,s){return `<header class="page-head"><h1 class="page-title">${t}</h1><p class="page-sub">${s}</p></header>`}
+function stats(){let active=Object.keys(DB.running).length,inc=DB.history.filter(x=>x.date===today()&&x.paid).reduce((a,x)=>a+x.price,0);return `<div class="stats"><div class="stat"><small>دستگاه فعال</small><b>${active}</b></div><div class="stat"><small>درآمد امروز</small><b>${money(inc)} ت</b></div><div class="stat"><small>کل دستگاه‌ها</small><b>${DB.devices.length}</b></div></div>`}
+
+function getAlarmLeft(r){
+ if(!r.alarm_at)return 0;
+ if(r.alarm_paused_at) return Math.max(0, r.alarm_at - r.alarm_paused_at);
+ return Math.max(0, r.alarm_at - Date.now()/1000);
+}
+function deviceCard(d){
+ let r=DB.running[d.id],off=!!d.disabled&&!r,t=TYPES[d.type]||TYPES.other,tp=r?timerPrice(d,r):0,bp=r?extras(r):0,total=tp+bp;
+ let alarmBox='';
+ if(r&&r.alarm_at){
+   let left=getAlarmLeft(r);
+   alarmBox=`<div class="alarm-box" data-alarm-box="${d.id}">${svgIcon('alarm',14)} زمان باقی‌مانده تا یادآوری: ${duration(left)}</div>`;
+ }
+ return `<article class="device ${off?'off':''}"><div class="device-top"><span class="device-icon">${svgIcon(t.icon,21)}</span><div style="min-width:0;flex:1"><div class="device-name">${t.name}</div><div class="device-meta">تعرفه بازی: ${money(d.price)} تومان / ساعت</div></div><div class="device-status-wrap"><span class="device-num-badge">شماره ${d.num}</span><span class="device-status-badge ${off?'is-off':r?(r.paused_at?'is-paused':'is-busy'):'is-free'}">${off?'غیرفعال':r?(r.paused_at?'مکث':'در حال بازی'):'آزاد'}</span></div></div><div class="timer" data-timer="${d.id}">${r?duration(elapsed(r)):'00:00:00'}</div>${r?`<div class="device-billing"><div class="billing-line"><span>هزینه تایمر و بازی</span><b data-timer-cost="${d.id}">${money(tp)} تومان</b></div><div class="billing-line"><span>قیمت بوفه و محصولات</span><b data-buffet-cost="${d.id}">${money(bp)} تومان</b></div><div class="billing-line total"><span>جمع کل حساب دستگاه</span><b data-cost="${d.id}">${money(total)} تومان</b></div></div>`:`<div class="status">${off?esc(d.reason||'دستگاه غیرفعال'):'آماده استفاده'}</div>`}${alarmBox}<div class="actions">${r?`<button class="btn" data-act="pause" data-id="${d.id}">${r.paused_at?'ادامه':'مکث'}</button><button class="btn danger" data-act="stop" data-id="${d.id}">پایان</button>`:`<button class="btn success" data-act="start" data-id="${d.id}" ${off?'disabled':''}>شروع بازی</button>`}<button class="btn" data-act="device-sale" data-id="${d.id}" ${!r?'disabled title="ابتدا بازی را شروع کنید"':''}>${svgIcon("basket",15)} فروش بوفه</button><button class="btn" data-act="alarm" data-id="${d.id}" ${!r?'disabled':''}>${svgIcon("alarm",15)} یادآوری</button></div></article>`;
+}
+
+function getWeekDays(){
+ let arr=[];
+ for(let i=6;i>=0;i--){
+  let d=new Date();d.setDate(d.getDate()-i);
+  arr.push({date:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`, label:d.toLocaleDateString('fa-IR',{weekday:'short'}), full:d});
+ }
+ return arr;
+}
+
+function dashboard(){
+  let ds=DB.devices.filter(d=>filter==='all'||filter==='busy'&&DB.running[d.id]||filter==='free'&&!DB.running[d.id]&&!d.disabled||filter==='off'&&d.disabled&&!DB.running[d.id]);
+  return pageHead('داشبورد','وضعیت دستگاه‌ها و هزینه بازی')+stats()+
+  `<div class="dash-header">
+    <div class="filters">
+      ${[['all','همه'],['free','آزاد'],['busy','در حال بازی'],['off','غیرفعال']].map(([k,v])=>`<button class="chip ${filter===k?'active':''}" data-filter="${k}">${v}</button>`).join('')}
+    </div>
+    <button class="sale-btn-dash" data-act="quick-sale">${svgIcon("basket",15)} فروش بوفه</button>
+  </div>
+  <div class="devices">${ds.length?ds.map(deviceCard).join(''):'<div class="empty">دستگاهی در این فیلتر وجود ندارد.</div>'}</div>`;
+}
+function store(){return pageHead('دستگاه‌ها و بوفه','مدیریت دستگاه‌ها، تعرفه‌ها و کالاهای بوفه')+`<section class="panel"><div class="panel-head"><h2 class="panel-title">${svgIcon("gamepad",17)} دستگاه‌ها</h2><button class="btn primary" data-act="add-device">${svgIcon("plus",15)} افزودن</button></div><p class="muted" style="font-size:11px;margin:0 0 12px">نوع، شماره و قیمت هر ساعت را تنظیم کنید. شماره هر دستگاه باید در کل دستگاه‌ها منحصربه‌فرد باشد (نمی‌توان یک شماره را روی دو دستگاه گذاشت). برای حذف یا تغییر وضعیت از کنترل‌های هر ردیف استفاده کنید.</p><div id="deviceRows" class="form-stack">${DB.devices.map(deviceRow).join('')}</div><button class="btn primary full" style="margin-top:12px" data-act="save-devices">ذخیره تغییرات دستگاه‌ها</button></section><section class="panel"><div class="panel-head"><h2 class="panel-title">${svgIcon("coffee",17)} منوی بوفه</h2><button class="btn primary" data-act="add-menu">${svgIcon("plus",15)} افزودن</button></div><div id="menuRows" class="form-stack">${DB.menu.map(menuRow).join('')}</div><button class="btn primary full" style="margin-top:12px" data-act="save-menu">ذخیره تغییرات بوفه</button></section>`}
+
+function deviceRow(d){
+ let t=TYPES[d.type]||TYPES.other;
+ let typeOptions=Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${d.type===k?'selected':''}>${v.name}</option>`).join('');
+ return `<div class="device-row" data-device-row data-id="${d.id||''}" data-slot="${d.slot||''}">
+  <div class="row-head"><span class="row-heading">${d.slot?'دستگاه '+d.slot:'دستگاه جدید'}</span><div class="row-tools"><span class="muted" style="font-size:10px">فعال</span><label class="switch"><input type="checkbox" class="enabled" ${d.disabled?'':'checked'}><i></i></label><button class="remove" data-act="remove-device-row" title="حذف">${svgIcon("trash",16)}</button></div></div>
+  <div class="device-fields">
+    <label class="field">نوع دستگاه<select class="input type">${typeOptions}</select></label>
+    <label class="field">شماره<input class="input center number" type="text" inputmode="numeric" value="${d.num||1}"></label>
+    <label class="field price-field">قیمت هر ساعت (تومان)<input class="input center price" type="text" inputmode="numeric" value="${money(d.price)}"></label>
+  </div>
+  <label class="field reason-wrap" style="${d.disabled?'':'display:none'}">دلیل غیرفعال بودن<input class="input reason" value="${esc(d.reason||'')}" placeholder="مثلاً خرابی یا تعمیر"></label>
+ </div>`;
+}
+function menuRow(m){return `<div class="menu-row" data-menu-row data-id="${m.id||''}"><input class="input m-name" placeholder="نام کالا" value="${esc(m.name)}"><div class="price-wrap"><input class="input m-price" inputmode="numeric" placeholder="قیمت" value="${money(m.price)}"></div><div class="stock-wrap"><input class="input m-stock" inputmode="numeric" placeholder="موجودی" value="${m.stock??0}"></div><button class="remove" data-act="remove-menu-row" title="حذف">${svgIcon("trash",16)}</button></div>`}
+
+function reports(){
+ let todayStr=today();
+ let rows=DB.history.filter(h=>h.date===todayStr).slice().reverse();
+ 
+ // محاسبه دقیق آمار امروز
+ let todayInc=0, todayDebt=0, todayGame=0, todayBuffet=0, todayBuffetCount=0;
+ 
+ for(let x of rows){
+   let isPaid = x.paid;
+   let isBuffetOnly = x.device==='فروش بوفه';
+   
+   if(isPaid) todayInc += x.price;
+   else todayDebt += x.price;
+   
+   if(isBuffetOnly) {
+      todayBuffet += x.price;
+      todayBuffetCount += x.items_count || 1;
+   } else {
+      todayGame += (x.timer_price ?? x.price);
+      todayBuffet += (x.buffet_price || 0);
+      if (x.items) {
+        todayBuffetCount += Object.values(x.items).reduce((a,b)=>a+b,0);
+      } else if (x.buffet_price > 0) {
+        todayBuffetCount += 1;
+      }
+   }
+ }
+
+ // ساخت داده‌های نمودار هفته
+ let weekDays = getWeekDays();
+ let maxWeek = 1;
+ let weekData = weekDays.map(d => {
+    let inc = DB.history.filter(x=>x.date===d.date && x.paid).reduce((a,x)=>a+x.price,0);
+    if (inc > maxWeek) maxWeek = inc;
+    return { label: d.label, inc: inc, date: d.date };
+ });
+
+ let chartHtml = weekData.map(w => `
+   <div class="chart-bar-wrap">
+     <div class="chart-bar ${w.date===todayStr?'today':''}" style="height:${(w.inc/maxWeek)*100}%" title="${money(w.inc)} تومان"></div>
+     <span class="chart-label">${w.label}</span>
+   </div>
+ `).join('');
+
+ // جدول گزارش روزانه هفته
+ let tableHtml = weekData.slice().reverse().map(w => {
+    let dayRows = DB.history.filter(x=>x.date===w.date);
+    let total = dayRows.reduce((a,x)=>a+x.price,0);
+    let count = dayRows.length;
+    return `<tr><td>${w.label} <span class="muted">${w.date}</span></td><td><b>${money(total)}</b> ت</td><td>${count} فاکتور</td></tr>`;
+ }).join('');
+
+ return pageHead('گزارش‌ها','نمای کلی فروش، هزینه بازی و تراکنش‌ها') + `
+ <div class="stats">
+ <div class="stat"><small>درآمد امروز</small><b>${money(todayInc)} ت</b></div>
+ <div class="stat"><small>قرض امروز</small><b>${money(todayDebt)} ت</b></div>
+ <div class="stat"><small>هزینه بازی</small><b>${money(todayGame)} ت</b></div>
+ <div class="stat"><small>فروش بوفه</small><b>${money(todayBuffet)} ت</b></div>
+ <div class="stat"><small>تعداد کل آیتم‌های بوفه</small><b>${todayBuffetCount}</b></div>
+ <div class="stat"><small>تعداد تراکنش</small><b>${rows.length}</b></div>
+ </div>
+
+ <section class="panel">
+ <h2 class="panel-title" style="margin:0 0 12px">${svgIcon('chart',17)} نمودار فروش هفته</h2>
+ <div class="week-chart">${chartHtml}</div>
+ </section>
+
+ <section class="panel">
+ <h2 class="panel-title" style="margin:0 0 12px">${svgIcon('chart',17)} سوابق امروز</h2>
+ <div class="list">${rows.length?rows.map(x=>`<div class="list-item"><div><b>${esc(x.device)}</b><div class="muted">${esc(x.time||'')} · ${x.seconds?duration(x.seconds):'فروش بوفه'}</div></div><div style="text-align:left"><b>${money(x.price)} تومان</b><div class="muted">${x.paid?'پرداخت شده':'قرض'}</div></div></div>`).join(''):'<div class="empty">هنوز سابقه‌ای ثبت نشده است.</div>'}</div>
+ </section>
+
+ <section class="panel">
+ <h2 class="panel-title" style="margin:0 0 12px">گزارش ۷ روز گذشته</h2>
+ <table class="report-table">
+ <thead><tr><th>روز</th><th>درآمد کل</th><th>تعداد فاکتور</th></tr></thead>
+ <tbody>${tableHtml}</tbody>
+ </table>
+ </section>
+ `;
+}
+
+function debts(){return pageHead('قرض‌ها','فهرست بدهی مشتری‌ها، مبالغ باقی‌مانده و تسویه‌ها')+`<section class="panel"><div class="panel-head"><h2 class="panel-title">مانده قرض‌ها: ${money(DB.debts.reduce((a,x)=>a+x.amount,0))} تومان</h2><button class="btn primary" data-act="add-debt">＋ قرض جدید</button></div><div class="list">${DB.debts.length?DB.debts.map((x,i)=>`<div class="list-item" style="${selectedDebt===i?'border-color:var(--blue)':''}" data-debt="${i}"><div><b>${esc(x.name)}</b><div class="muted">${esc(x.note||'')} · ${esc(x.date||'')}</div></div><b style="white-space:nowrap;color:var(--orange)">${money(x.amount)} تومان</b></div>`).join(''):'<div class="empty">قرضی ثبت نشده است.</div>'}</div><div class="actions"><button class="btn success" data-act="pay-debt">تسویه قرض انتخاب‌شده</button><button class="btn danger" data-act="delete-debt">حذف قرض</button></div></section>`}
+function settings(){
+  return pageHead('تنظیمات','مدیریت اطلاعات و نسخه پشتیبان')+`
+  <section class="panel">
+    <h2 class="panel-title" style="margin:0 0 12px">اطلاعات مجموعه</h2>
+    <label class="field">نام فروشگاه<input class="input" id="shopName" value="${esc(DB.shop||'')}" placeholder="نام فروشگاه خود را بنویسید"></label>
+    <p class="muted" style="font-size:10px;margin-top:6px">این نام در کنار «بازی تایم» در بالای صفحه نمایش داده می‌شود.</p>
+    <button class="btn primary full" style="margin-top:12px" data-act="save-shop">ذخیره نام فروشگاه</button>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title">تاریک / روشن</h2><label class="switch"><input id="themeSwitch" type="checkbox" ${DB.theme==='dark'?'checked':''}><i></i></label></div>
+    <div class="panel-head" style="margin:0"><span style="font-size:12px">پشتیبان‌گیری خودکار روزانه</span><label class="switch"><input id="backupSwitch" type="checkbox" ${DB.autoBackup?'checked':''}><i></i></label></div>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title" style="margin:0 0 12px">نسخه پشتیبان</h2>
+    <p class="muted" style="font-size:11px;line-height:1.9">اطلاعات در حافظه مرورگر ذخیره می‌شود. برای نگهداری امن، هر چند وقت یک‌بار فایل پشتیبان دریافت کنید.</p>
+    <div class="actions"><button class="btn primary" data-act="export">دریافت فایل پشتیبان</button><label class="btn success">بازیابی فایل<input id="importFile" type="file" accept="application/json" hidden></label></div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2 class="panel-title">درباره</h2><span class="muted" style="font-size:11px">نسخه ۱.۰</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:16px">
+      <img src="data:image/jpeg;base64,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" alt="حسین هادی پور" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--blue);box-shadow:0 3px 10px #0003">
+      <div class="muted" style="font-size:12px;text-align:center">طراحی و توسعه: <b style="color:var(--text)">حسین هادی پور</b></div>
+    </div>
+    <div class="form-stack">
+      <a href="https://www.myhadipour.ir" target="_blank" class="btn full" style="justify-content:center;text-decoration:none">${svgIcon('globe',18)} سایت شخصی: www.myhadipour.ir</a>
+      <a href="https://donito.me/hadipour" target="_blank" class="btn warn full" style="justify-content:center;text-decoration:none">${svgIcon('heart',18)} حمایت مالی</a>
+      <a href="https://github.com/myhadipour" target="_blank" class="btn dark full" style="justify-content:center;text-decoration:none;background:#24292e;color:#fff">${svgIcon('github',18)} گیت‌هاب</a>
+    </div>
+  </section>`;
+}
+function render(){let f={dashboard,reports,debts,store,settings}[page];$('#main').innerHTML=f();$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===page));updateHeaderShop()}
+function modal(content){let o=document.createElement('div');o.className='overlay';o.innerHTML=`<section class="modal">${content}</section>`;o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.append(o);return o}
+function ask(title,fields){return new Promise(resolve=>{let o=modal(`<h3>${title}</h3>${fields}<div class="modal-actions"><button class="btn" id="cancel">انصراف</button><button class="btn primary" id="ok">تأیید</button></div>`);$('#cancel',o).onclick=()=>{o.remove();resolve(null)};$('#ok',o).onclick=()=>{let v=$$('.ask-field',o).map(x=>x.value.trim());if(v.some(x=>!x)){toast('همه فیلدها را تکمیل کنید.','error');return}o.remove();resolve(v)};})}
+
+async function startDevice(id){if(DB.devices.find(x=>x.id===id)?.disabled)return;DB.running[id]={start:Date.now()/1000,alarm_at:null,alarm_paused_at:null,paused_at:null,paused_total:0,items:{}};save();render()}
+async function stopDevice(id){
+ let d=DB.devices.find(x=>x.id===id),r=DB.running[id];if(!r)return;
+ let seconds=elapsed(r),gameAmount=timerPrice(d,r),buffetAmount=extras(r),total=gameAmount+buffetAmount;
+ let itemCount = Object.values(r.items||{}).reduce((a,b)=>a+b,0);
+ let o=modal(`<h3>پایان بازی — ${esc(d.name)}</h3><div class="device-billing"><div class="billing-line"><span>مدت بازی</span><b>${duration(seconds)}</b></div><div class="billing-line"><span>هزینه تایمر و بازی</span><b>${money(gameAmount)} تومان</b></div><div class="billing-line"><span>قیمت بوفه و محصولات (${itemCount} آیتم)</span><b>${money(buffetAmount)} تومان</b></div><div class="billing-line total"><span>جمع کل</span><b>${money(total)} تومان</b></div></div><label class="field">مبلغ نهایی<input class="input" id="finalPrice" value="${total}" inputmode="numeric"></label><div class="modal-actions"><button class="btn" id="continue">ادامه بازی</button><button class="btn warn" id="debt">ثبت قرض</button><button class="btn primary" id="paid">پرداخت شد</button></div>`);
+ $('#continue',o).onclick=()=>o.remove();
+ async function finish(paid){
+  let amount=num($('#finalPrice',o).value);
+  if(amount===null){toast('مبلغ معتبر نیست.','error');return}
+  let customer='';
+  if(!paid){o.remove();let v=await ask('ثبت قرض','<label class="field">نام مشتری<input class="input ask-field"></label>');if(!v)return;customer=v[0];DB.debts.push({name:customer,amount,note:d.name,date:today()})}else o.remove();
+  let now=new Date();
+  DB.history.push({
+    date:today(), time:now.toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),
+    device:TYPES[d.type]?.name||d.name,
+    seconds, price:amount, timer_price:gameAmount, buffet_price:buffetAmount,
+    items: r.items,
+    paid
+  });
+  delete DB.running[id];save();render();
+ }
+ $('#paid',o).onclick=()=>finish(true);$('#debt',o).onclick=()=>finish(false);
+}
+
+async function alarm(id){
+ const r=DB.running[id],d=DB.devices.find(x=>x.id===id);if(!r||!d)return;
+ const current = r.alarm_at ? Math.ceil(getAlarmLeft(r)/60) : 0;
+ const o=modal(`<h3>تنظیم یادآوری — ${esc(d.name)}</h3><div class="form-stack">
+ <label class="field">چند دقیقه دیگر یادآوری شود؟<input class="input" id="alarmMinutes" type="number" min="0" max="1440" step="1" value="${current}" placeholder="۰ یعنی خاموش"></label>
+ <label class="field">یادداشت (اختیاری)<input class="input" id="alarmMessage" maxlength="160" value="${esc(r.alarm_message||'')}" placeholder="مثلاً مشتری گفته این ساعت می‌خواهیم بازی کنیم"></label>
+ <div class="muted" style="font-size:11px;line-height:1.9">زمان را به دقیقه وارد کنید. زمان یادآوری هماهنگ با مکث و ادامه بازی جلو می‌رود.</div>
+ </div><div class="modal-actions"><button class="btn" id="alarmCancel">انصراف</button><button class="btn danger" id="alarmOff">خاموش کردن</button><button class="btn primary" id="alarmSave">فعال‌سازی یادآوری</button></div>`);
+ $('#alarmCancel',o).onclick=()=>o.remove();
+ $('#alarmOff',o).onclick=()=>{r.alarm_at=null;r.alarm_message='';r.alarm_paused_at=null;r.rang=false;save();o.remove();render();toast('یادآوری خاموش شد.','success')};
+ $('#alarmSave',o).onclick=()=>{
+   let m=num($('#alarmMinutes',o).value);
+   if(m===null||m<1||m>1440){toast('زمان باید بین ۱ تا ۱۴۴۰ دقیقه باشد.','error');return}
+   r.alarm_at = Date.now()/1000 + m*60;
+   r.alarm_paused_at = null;
+   r.alarm_message=$('#alarmMessage',o).value.trim()||'وقت بازی رسیده است.';
+   r.rang=false;save();o.remove();render();toast('یادآوری برای '+m+' دقیقه دیگر فعال شد.','success')
+ };
+}
+
+/* ===== فروش بوفه ===== */
+async function deviceSale(deviceId){
+ const d=DB.devices.find(x=>x.id===deviceId),r=DB.running[deviceId];
+ if(!d||!r){toast('ابتدا بازی این دستگاه را شروع کنید.');return}
+ if(!DB.menu.length){toast('ابتدا کالا به منوی بوفه اضافه کنید.');return}
+ let qty={};
+ let o=modal(`<h3>فروش بوفه برای ${esc(TYPES[d.type]?.name||d.name)}</h3>
+ <div class="sale-list">
+  ${DB.menu.map(m=>`<div class="sale-item">
+   <div class="sale-info"><b>${esc(m.name)}</b><small>${money(m.price)} تومان · موجودی ${m.stock??0}</small></div>
+   <div class="sale-controls">
+    <button class="btn" data-q="${m.id}" data-d="-1">−</button>
+    <b id="q${m.id}">0</b>
+    <button class="btn" data-q="${m.id}" data-d="1" ${(m.stock??0)<=0?'disabled':''}>+</button>
+   </div>
+  </div>`).join('')}
+ </div>
+ <p id="saleTotal" style="text-align:center;font-weight:800;margin:12px 0">جمع: ۰ تومان</p>
+ <div class="modal-actions"><button class="btn" id="saleCancel">انصراف</button><button class="btn primary" id="saleAdd">ثبت روی حساب دستگاه</button></div>`);
+ function draw(){let total=DB.menu.reduce((a,m)=>a+m.price*(qty[m.id]||0),0);$('#saleTotal',o).textContent='جمع: '+money(total)+' تومان'}
+ o.addEventListener('click',e=>{let b=e.target.closest('[data-q]');if(!b)return;let id=Number(b.dataset.q),m=DB.menu.find(x=>x.id===id),next=Math.max(0,(qty[id]||0)+Number(b.dataset.d));if(next>(m?.stock??0)){toast('موجودی این کالا کافی نیست.');return}qty[id]=next;$('#q'+id,o).textContent=next;draw()});
+ $('#saleCancel',o).onclick=()=>o.remove();
+ $('#saleAdd',o).onclick=()=>{
+  let selected=DB.menu.filter(m=>(qty[m.id]||0)>0);if(!selected.length){toast('کالایی انتخاب نشده.');return}
+  for(const m of selected)if((m.stock??0)<qty[m.id]){toast('موجودی '+m.name+' کافی نیست.');return}
+  r.items=r.items||{};r.item_prices=r.item_prices||{};
+  selected.forEach(m=>{r.items[m.id]=(r.items[m.id]||0)+qty[m.id];r.item_prices[m.id]=m.price;m.stock-=qty[m.id]});
+  save();o.remove();render();toast('فروش بوفه به حساب دستگاه اضافه شد.','success');
+ };
+}
+function quickSale(){
+ if(!DB.menu.length){toast('ابتدا کالا به منوی بوفه اضافه کنید.');return}
+ let qty={};
+ let o=modal(`<h3>فروش بوفه</h3>
+ <div class="sale-list">
+  ${DB.menu.map(m=>`<div class="sale-item">
+   <div class="sale-info"><b>${esc(m.name)}</b><small>${money(m.price)} تومان</small></div>
+   <div class="sale-controls">
+    <button class="btn" data-q="${m.id}" data-d="-1">−</button>
+    <b id="q${m.id}">0</b>
+    <button class="btn" data-q="${m.id}" data-d="1">+</button>
+   </div>
+  </div>`).join('')}
+ </div>
+ <p id="saleTotal" style="text-align:center;font-weight:800;margin:12px 0">جمع: ۰ تومان</p>
+ <div class="modal-actions"><button class="btn" id="saleCancel">انصراف</button><button class="btn warn" id="saleDebt">قرض</button><button class="btn primary" id="salePaid">دریافت شد</button></div>`);
+ function draw(){ $('#saleTotal',o).textContent='جمع: '+money(DB.menu.reduce((a,m)=>a+m.price*(qty[m.id]||0),0))+' تومان'}
+ o.addEventListener('click',e=>{let b=e.target.closest('[data-q]');if(!b)return;let id=b.dataset.q;qty[id]=Math.max(0,(qty[id]||0)+Number(b.dataset.d));$('#q'+id,o).textContent=qty[id];draw()});
+ $('#saleCancel',o).onclick=()=>o.remove();
+ async function finish(paid){
+  let total=DB.menu.reduce((a,m)=>a+m.price*(qty[m.id]||0),0);if(!total){toast('کالایی انتخاب نشده.');return}
+  let who='';
+  if(!paid){o.remove();let v=await ask('ثبت قرض','<label class="field">نام مشتری<input class="input ask-field"></label>');if(!v)return;who=v[0];DB.debts.push({name:who,amount:total,note:'فروش بوفه',date:today()})}else o.remove();
+  DB.menu.forEach(m=>m.stock=Math.max(0,(m.stock||0)-(qty[m.id]||0)));
+  let itemsCount = Object.values(qty).reduce((a,b)=>a+b,0);
+  DB.history.push({date:today(),time:new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}),device:'فروش بوفه',seconds:0,price:total, items_count: itemsCount, paid});
+  save();render();toast('فروش ثبت شد.','success')
+ }
+ $('#salePaid',o).onclick=()=>finish(true);$('#saleDebt',o).onclick=()=>finish(false);
+}
+function saveDevices(){
+ let rows=$$('[data-device-row]'),next=DB.next_id||1,arr=[],slot=Math.max(0,...DB.devices.map(d=>d.slot||0));
+ for(let row of rows){
+  let type=$('.type',row).value,n=num($('.number',row).value),p=num($('.price',row).value),id=row.dataset.id?Number(row.dataset.id):next++,enabled=$('.enabled',row).checked;
+  if(!n||p===null){toast('شماره و قیمت دستگاه را بررسی کنید.','error');return}
+  if(!enabled&&DB.running[id]){toast('ابتدا بازی دستگاه فعال را پایان دهید.','error');return}
+  arr.push({id,type,num:n,slot:Number(row.dataset.slot)||++slot,price:p,name:TYPES[type].name,disabled:!enabled,reason:enabled?'':$('.reason',row).value.trim()})
+ }
+ if(new Set(arr.map(d=>d.num)).size!==arr.length){toast('شماره دستگاه تکراری است. هر دستگاه باید شماره‌ی منحصربه‌فرد داشته باشد.','error');return}
+ let keep=new Set(arr.map(d=>d.id));
+ if(Object.keys(DB.running).some(k=>!keep.has(Number(k)))){toast('برای حذف دستگاه در حال بازی، ابتدا بازی را پایان دهید.','error');return}
+ DB.devices=arr;DB.next_id=next;save();render();toast('دستگاه‌ها ذخیره شدند.','success')
+}
+function saveMenu(){
+ let next=DB.next_id||1,arr=[];
+ for(let row of $$('[data-menu-row]')){
+  let name=$('.m-name',row).value.trim();if(!name)continue;
+  let p=num($('.m-price',row).value),stock=num($('.m-stock',row).value);
+  if(p===null||stock===null){toast('قیمت و موجودی کالا را بررسی کنید.','error');return}
+  arr.push({id:row.dataset.id?Number(row.dataset.id):next++,name,price:p,stock})
+ }
+ DB.menu=arr;DB.next_id=next;save();render();toast('منوی بوفه ذخیره شد.','success')
+}
+function exportBackup(){let blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download='bazi-time-backup-'+today()+'.json';a.click();URL.revokeObjectURL(u)}
+document.addEventListener('click',async e=>{
+ let b=e.target.closest('[data-act]');
+ if(b){
+  let a=b.dataset.act,id=Number(b.dataset.id);
+  if(a==='start')startDevice(id);
+  if(a==='stop')stopDevice(id);
+  if(a==='pause'){
+    let r=DB.running[id],n=Date.now()/1000;
+    if(r.paused_at){
+      r.paused_total=(r.paused_total||0)+n-r.paused_at;
+      r.paused_at=null;
+      if(r.alarm_paused_at){
+         r.alarm_at = r.alarm_at + (n - r.alarm_paused_at);
+         r.alarm_paused_at = null;
+      }
+    } else {
+      r.paused_at=n;
+      if(r.alarm_at && !r.alarm_paused_at) r.alarm_paused_at = n;
+    }
+    save();render();
+  }
+  if(a==='alarm')alarm(id);
+  if(a==='quick-sale')quickSale();
+  if(a==='device-sale')deviceSale(id);
+  if(a==='add-device'){$('#deviceRows').insertAdjacentHTML('beforeend',deviceRow({type:'ps5',num:1,price:TYPES.ps5.price}));}
+  if(a==='add-menu')$('#menuRows').insertAdjacentHTML('beforeend',menuRow({name:'',price:10000,stock:0}));
+  if(a==='remove-device-row'){let row=b.closest('[data-device-row]');if(row.dataset.id&&DB.running[row.dataset.id]){toast('دستگاه در حال بازی قابل حذف نیست.','error');return}row.remove()}
+  if(a==='remove-menu-row')b.closest('[data-menu-row]').remove();
+  if(a==='save-devices')saveDevices();
+  if(a==='save-menu')saveMenu();
+  if(a==='export')exportBackup();
+  if(a==='save-shop'){let n=$('#shopName').value.trim();DB.shop=n;save();updateHeaderShop();toast('نام فروشگاه ذخیره شد.','success')}
+  if(a==='add-debt'){let v=await ask('قرض جدید','<label class="field">نام مشتری<input class="input ask-field"></label><label class="field">مبلغ به تومان<input class="input ask-field" inputmode="numeric"></label><label class="field">توضیح<input class="input ask-field"></label>');if(v){let amount=num(v[1]);if(!amount){toast('مبلغ معتبر نیست.','error');return}DB.debts.push({name:v[0],amount,note:v[2],date:today()});save();render()}}
+  if(a==='pay-debt'){if(selectedDebt===null){toast('ابتدا یک قرض انتخاب کنید.');return}let x=DB.debts[selectedDebt];let v=await ask('تسویه قرض',`<label class="field">مبلغ دریافتی از ${esc(x.name)}<input class="input ask-field" value="${x.amount}" inputmode="numeric"></label>`);if(v){let n=num(v[0]);if(!n)return;x.amount-=Math.min(n,x.amount);if(x.amount<=0)DB.debts.splice(selectedDebt,1);selectedDebt=null;save();render()}}
+  if(a==='delete-debt'){if(selectedDebt===null){toast('ابتدا یک قرض انتخاب کنید.');return}if(confirm('این قرض حذف شود؟')){DB.debts.splice(selectedDebt,1);selectedDebt=null;save();render()}}
+ }
+ let nav=e.target.closest('[data-page]');if(nav){page=nav.dataset.page;selectedDebt=null;render()}
+ let fil=e.target.closest('[data-filter]');if(fil){filter=fil.dataset.filter;render()}
+ let debt=e.target.closest('[data-debt]');if(debt){selectedDebt=Number(debt.dataset.debt);render()}
+})
+document.addEventListener('change',e=>{
+ if(e.target.classList.contains('enabled')){let row=e.target.closest('[data-device-row]'),wrap=$('.reason-wrap',row);if(wrap)wrap.style.display=e.target.checked?'none':'flex'}
+ if(e.target.id==='themeSwitch'){DB.theme=e.target.checked?'dark':'light';save();theme()}
+ if(e.target.id==='backupSwitch'){DB.autoBackup=e.target.checked;save()}
+ if(e.target.id==='importFile'&&e.target.files[0]){let f=e.target.files[0];if(!confirm('اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟'))return;f.text().then(t=>{try{DB=Object.assign(defaults(),JSON.parse(t));save();theme();render();toast('بازیابی انجام شد.','success')}catch(err){toast('فایل پشتیبان معتبر نیست.','error')}})}
+});
+$('#themeTop').onclick=()=>{DB.theme=DB.theme==='dark'?'light':'dark';save();theme()};
+function showAlarmNotice(d,r){
+ let msg=r.alarm_message||'این زمان برای بازی در نظر گرفته شده بود و اکنون زمانش تمام شده است.';
+ let o=modal(`<div class="alarm-modal"><div class="alarm-symbol">${svgIcon('alarm',30)}</div><h2>زمان یادآوری رسید</h2><p>دستگاه <span class="device-name">${esc(d.name)}</span> گفته بود این زمان می‌خواهیم بازی کنیم و زمانش تمام شده.<br><span class="alarm-note">${esc(msg)}</span></p><div class="modal-actions"><button class="btn primary full" id="alarmAcknowledge">متوجه شدم</button></div></div>`);
+ o.classList.add('alarm-overlay');
+ $('#alarmAcknowledge',o).onclick=()=>o.remove();
+ try{if('Notification'in window&&Notification.permission==='granted')new Notification('بازی تایم',{body:'دستگاه '+d.name+' گفته بود این زمان می‌خواهیم بازی کنیم و زمانش تمام شده.'})}catch(e){}
+}
+function tick(){
+ let changed=false;
+ for(let [id,r] of Object.entries(DB.running)){
+  let d=DB.devices.find(x=>String(x.id)===id);if(!d)continue;
+  let t=$(`[data-timer="${id}"]`),c=$(`[data-cost="${id}"]`),tc=$(`[data-timer-cost="${id}"]`),bc=$(`[data-buffet-cost="${id}"]`),ab=$(`[data-alarm-box="${id}"]`);
+  if(t)t.textContent=duration(elapsed(r));
+  if(tc)tc.textContent=money(timerPrice(d,r))+' تومان';
+  if(bc)bc.textContent=money(extras(r))+' تومان';
+  if(c)c.textContent=money(priceOf(d,r))+' تومان';
+  
+  if(r.alarm_at){
+   let left=getAlarmLeft(r);
+   if(ab)ab.innerHTML=`${svgIcon('alarm',14)} زمان باقی‌مانده تا یادآوری: ${duration(left)}`;
+   if(left<=0&&!r.rang){r.rang=true;changed=true;showAlarmNotice(d,r)}
+  }
+ }
+ if(changed)save()
+}
+theme();render();tickHandle=setInterval(tick,1000);
+</script>
+</body>
+</html>
