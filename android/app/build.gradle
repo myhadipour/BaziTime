@@ -13,23 +13,4 @@ android {
         versionCode 2
         versionName '1.1'
     }
-
-    signingConfigs {
-        release {
-            def ks = System.getenv('ANDROID_KEYSTORE_FILE')
-            if (ks != null && !ks.isEmpty()) {
-                storeFile file(ks)
-                storePassword System.getenv('KEYSTORE_PASSWORD')
-                keyAlias System.getenv('KEY_ALIAS')
-                keyPassword System.getenv('KEY_PASSWORD')
-            }
-        }
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled false
-        }
-    }
 }
