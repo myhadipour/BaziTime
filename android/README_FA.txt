@@ -1,22 +1,18 @@
-بازی تایم - نسخه اندروید
+بازی تایم - پروژه اندروید
 
+نام برنامه: بازی تایم
 شناسه بسته: com.bazitime.app
 نسخه: 1.1
 
-ساخت APK با GitHub Actions:
-1) پوشه‌ها و فایل‌های این پروژه را مستقیماً در ریشه Repository قرار دهید.
-2) وارد زبانه Actions شوید.
-3) گردش‌کار Build Bazi Time Android APK را اجرا کنید.
-4) پس از موفقیت، فایل BaziTime-Android.apk را از بخش Artifacts دریافت کنید.
-
-ساخت محلی:
-پوشه android را در Android Studio باز کنید، Gradle Sync را انجام دهید و task زیر را اجرا کنید:
-assembleDebug
-
-فایل خروجی:
-app/build/outputs/apk/debug/app-debug.apk
+ساخت APK:
+1) Android Studio را نصب کنید.
+2) این پوشه را در Android Studio با گزینه Open باز کنید.
+3) اجازه دهید Gradle Sync انجام شود و Android SDK Platform 35 نصب شود.
+4) از منوی Build > Build Bundle(s) / APK(s) > Build APK(s) را انتخاب کنید.
+5) فایل APK در مسیر app/build/outputs/apk/debug/app-debug.apk ساخته می‌شود.
 
 نکته:
-- رابط برنامه از فایل android/app/src/main/assets/index.html بارگذاری می‌شود.
-- داده‌های برنامه در فضای ذخیره‌سازی WebView روی همان دستگاه نگهداری می‌شوند.
-- برای نگهداری امن اطلاعات، از قابلیت دریافت و بازیابی فایل پشتیبان داخل برنامه استفاده کنید.
+- فایل HTML در assets قرار دارد و به صورت آفلاین در WebView اجرا می‌شود.
+- فونت Vazirmatn در HTML از Google Fonts بارگیری می‌شود؛ برای دریافت فونت اینترنت لازم است.
+- داده‌های برنامه در فضای ذخیره‌سازی WebView روی همان دستگاه نگهداری می‌شوند. حذف داده‌های برنامه می‌تواند اطلاعات را پاک کند؛ از بخش پشتیبان‌گیری داخل برنامه استفاده کنید.
+- شناسه بسته پیش‌فرض com.bazitime.app است و در صورت نیاز قابل تغییر است.
