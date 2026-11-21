@@ -13,6 +13,9 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      ANDROID_COMPILE_SDK: '35'
+      ANDROID_BUILD_TOOLS: '35.0.0'
     steps:
       - name: Checkout source
         uses: actions/checkout@v5
@@ -23,24 +26,60 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # Use the Android SDK already installed on GitHub's Ubuntu runner.
+      # Avoid the separate SDK setup action: the previous workflow failed at that step.
+      - name: Locate Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          if [ ! -d "$SDK" ]; then
+            echo "Android SDK directory not found: $SDK"
+            env | grep -E 'ANDROID|SDK' || true
+            exit 1
+          fi
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          if [ -x "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          else
+            SDKMANAGER="$(find "$SDK/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1)"
+            if [ -z "$SDKMANAGER" ]; then
+              echo "sdkmanager was not found under $SDK/cmdline-tools"
+              exit 1
+            fi
+            dirname "$SDKMANAGER" >> "$GITHUB_PATH"
+          fi
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
 
-      - name: Set up Gradle
+      - name: Accept licenses and install Android packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-${ANDROID_COMPILE_SDK}" \
+            "build-tools;${ANDROID_BUILD_TOOLS}"
+
+      - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
       - name: Build APK
-        run: |
-          cd android
-          gradle --no-daemon --stacktrace clean assembleDebug
-          mkdir -p ../release-out
-          cp app/build/outputs/apk/debug/app-debug.apk ../release-out/BaziTime-Android.apk
+        working-directory: android
+        run: gradle --no-daemon --stacktrace clean assembleDebug
 
       - name: Verify APK
+        shell: bash
         run: |
-          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)/apksigner" verify release-out/BaziTime-Android.apk
+          set -euo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          mkdir -p release-out
+          cp "$APK" release-out/BaziTime-Android.apk
+          ls -lh release-out/BaziTime-Android.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
