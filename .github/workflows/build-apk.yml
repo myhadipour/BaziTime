@@ -1,12 +1,13 @@
-name: Build Bazi Time Android APK
+name: Build BaziTime Android APK
 
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -26,8 +27,8 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Use the Android SDK already installed on GitHub's Ubuntu runner.
-      # Avoid the separate SDK setup action: the previous workflow failed at that step.
+      # GitHub-hosted Ubuntu images already include Android SDK.
+      # Use the runner's SDK directly instead of the failing setup-android action.
       - name: Locate Android SDK
         shell: bash
         run: |
@@ -81,10 +82,10 @@ jobs:
           cp "$APK" release-out/BaziTime-Android.apk
           ls -lh release-out/BaziTime-Android.apk
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: BaziTime-Android-APK
+          name: BaziTime-APK
           path: release-out/BaziTime-Android.apk
           if-no-files-found: error
           retention-days: 30
